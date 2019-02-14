@@ -44,7 +44,7 @@ class Transformer:
 
     def learned_positional_encoding(self, inputs, max_length, num_units):
         outputs = tf.range(tf.shape(inputs)[1])  # (T_q)
-        outputs = tf.expand_dims(outputs, 0)  # (1, T_q)
+        outputs = tf.expand_dims(outputs, 0)     # (1, T_q)
         outputs = tf.tile(outputs, [tf.shape(inputs)[0], 1])  # (N, T_q)
         with tf.variable_scope("embeddings") as scope:
             pos_embedding = tf.get_variable(name="pos_embedding", shape=[max_length, num_units],
@@ -60,6 +60,9 @@ class Transformer:
         # Readout layer
         # outputs = tf.layers.conv1d(outputs, num_units[1], kernel_size=1, activation=None)
         outputs = tf.layers.dense(outputs, num_units[1], activation=None)
+
+        # drop_out before add&norm
+        outputs = tf.layers.dropout(outputs, drop_out, training=is_training)
         # Residual connection
         outputs += inputs
         # Normalize
@@ -146,6 +149,6 @@ class Transformer:
                                                          dropout_rate=self.hparams.dropout, is_training=self.hparams.is_training)
             with tf.variable_scope('ffn_' + str(layer)):
                 attn_outputs = self.pointwise_feedforward(attn_outputs, self.hparams.dropout, self.hparams.is_training,
-                                                              num_units=[4 * self.hparams.num_units, self.hparams.num_units],
-                                                              activation=tf.nn.relu)
+                                                          num_units=[4 * self.hparams.num_units, self.hparams.num_units],
+                                                          activation=tf.nn.relu)
         return attn_outputs
