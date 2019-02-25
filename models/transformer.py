@@ -139,17 +139,20 @@ class Transformer:
         attn_outputs = inputs
 
         with tf.name_scope("add_pos_encoding"):
-            pos_encoding = self.learned_positional_encoding(attn_outputs, max_seq_len, self.hparams.num_units)
+            pos_encoding = self.learned_positional_encoding(attn_outputs, max_seq_len, self.hparams["num_units"])
             attn_outputs = attn_outputs + pos_encoding
-            attn_outputs = tf.layers.dropout(attn_outputs, self.hparams.dropout, training=self.hparams.is_training)
+            attn_outputs = tf.layers.dropout(attn_outputs, self.hparams["dropout"], training=self.hparams["is_training"])
 
-        for layer in range(self.hparams.num_multi_head):
+        for layer in range(self.hparams["num_multi_head"]):
             with tf.variable_scope('self_attn_' + str(layer)):
-                attn_outputs = self.self_multi_head_attn(attn_outputs, num_units=self.hparams.num_units,
-                                                         num_heads=self.hparams.num_heads, key_masks=key_masks_1d,
-                                                         dropout_rate=self.hparams.dropout, is_training=self.hparams.is_training)
+                attn_outputs = self.self_multi_head_attn(attn_outputs, num_units=self.hparams["num_units"],
+                                                         num_heads=self.hparams["num_heads"],
+                                                         key_masks=key_masks_1d,
+                                                         dropout_rate=self.hparams["dropout"],
+                                                         is_training=self.hparams["is_training"])
             with tf.variable_scope('ffn_' + str(layer)):
-                attn_outputs = self.pointwise_feedforward(attn_outputs, self.hparams.dropout, self.hparams.is_training,
-                                                          num_units=[4 * self.hparams.num_units, self.hparams.num_units],
+                attn_outputs = self.pointwise_feedforward(attn_outputs, self.hparams["dropout"],
+                                                          self.hparams["is_training"],
+                                                          num_units=[4 * self.hparams["num_units"], self.hparams["num_units"]],
                                                           activation=tf.nn.relu)
         return attn_outputs

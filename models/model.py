@@ -5,6 +5,8 @@ import numpy as np
 import pickle
 import tensorflow as tf
 import model.config as config
+
+from models.transformer import Transformer
 from .base_model import BaseModel
 import model.util as util
 
@@ -154,6 +156,14 @@ class Model(BaseModel):
             output = tf.concat([output_fw, output_bw], axis=-1)
             self.context_emb = tf.nn.dropout(output, self.dropout)
             #print("context_emb = ", self.context_emb)  # [batch, words, 300]
+
+    def add_context_tr_emb_op(self):
+        hparams = {"num_units": 128, "dropout": 0.2, "is_training":True, "num_multi_head": 6, "num_heads":8}
+        with tf.variable_scope("context-bi-transformer"):
+            transformer = Transformer(hparams)
+            output = transformer.encoder(self.word_embeddings, self.words_len)
+            # self.context_emb = tf.nn.dropout(output, self.dropout)
+            self.context_emb = output
 
     def add_span_emb_op(self):
         mention_emb_list = []
@@ -419,5 +429,3 @@ class Model(BaseModel):
         else:
             temp_mask = tf.sequence_mask(mytensor, max_width, dtype=tf.float32)
         return temp_mask
-
-
