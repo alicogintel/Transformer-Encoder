@@ -158,7 +158,7 @@ class Model(BaseModel):
             #print("context_emb = ", self.context_emb)  # [batch, words, 300]
 
     def add_context_tr_emb_op(self):
-        hparams = {"num_units": 300, "dropout": self.dropout, "is_training":True, "num_multi_head": 6, "num_heads":6}
+        hparams = {"num_units": 300, "dropout": self.dropout, "is_training":True, "num_multi_head": 6, "num_heads":6, "max_seq_len":512}
         with tf.variable_scope("context-bi-transformer"):
             transformer = Transformer(hparams)
             output = transformer.encoder(self.word_embeddings, self.words_len)

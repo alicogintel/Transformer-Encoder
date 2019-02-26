@@ -139,7 +139,7 @@ class Transformer:
         attn_outputs = inputs
 
         with tf.name_scope("add_pos_encoding"):
-            pos_encoding = self.learned_positional_encoding(attn_outputs, max_seq_len, self.hparams["num_units"])
+            pos_encoding = self.learned_positional_encoding(attn_outputs, self.hparams["max_seq_len"], self.hparams["num_units"])
             attn_outputs = attn_outputs + pos_encoding
             attn_outputs = tf.layers.dropout(attn_outputs, self.hparams["dropout"], training=self.hparams["is_training"])
 
